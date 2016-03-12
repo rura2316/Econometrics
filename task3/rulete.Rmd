@@ -1,0 +1,32 @@
+---
+title: "Ruletė"
+output: html_document
+author: Rūta Radavičiūtė
+---
+
+Užduotis:
+Nagrinėkime standartinę kazino ruletę. Kokia tikimybė po $1000$ vienodų statymų ant vienos pasirinktos spalvos, bus teigiamas balansas? Raskite apytikslę $x$ reikšmę, kuriai galioja nelygybe $P(balansas<x) = 0.25$.
+
+Statymų ant vienos pasirinktos spalvos funkcija:
+```{r}
+rulete<-function(){
+  laimejimas<-sum(sample(c(1,-1), size=1000, replace=TRUE, prob=c(18/38,20/38)))
+} 
+#laimėjimas po 1000 vienodų statymų
+```
+
+Ieškomas balancas:
+```{r}
+balansas<-replicate(1000,rulete()) #kartojame 1000kartų
+```
+
+Tikimybė, kad balansas bus teigiamas:
+```{r}
+mean(balansas>0)
+```
+
+Apytikslė $x$ reikšmė, kuriai galioja nelygybė $P(balansas<x) = 0.25$:
+```{r}
+quantile(balansas, 0.25) 
+```
+
