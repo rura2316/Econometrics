@@ -4,36 +4,41 @@ output: html_document
 author: Rūta Radavičiūtė
 ---
 
-Tarkime metama moneta. Jeigu iškrenta herbas, tai laimite $12$ EUR.Jeigu skaiciu, tai pralošiate $10$ EUR. Bus žaidžiama $n$ kartu ir gauti rezultatai sumuojami. 
-Kokia tikimybe jums tureti teigiama balansa po $n$ kartu?Koks išlošiu pasikliautiniai $95%$ intervalai.Ištirkite tikimybes su skirtingais $n$, pvz. $n={1,2,5,10,20,100}$.Kaip atrodo balanso tankis? Kai $n=100$.
+**Užduotis:**
+Tarkime metama moneta. Jeigu iškrenta herbas, tai laimite $12$ EUR. Jeigu skaičius, tai pralošiate $10$ EUR. Bus žaidžiama $n$ kartų ir gauti rezultatai sumuojami. Kokia tikimybė jums turėti teigiamą balansą po $n$ kartų? Kokis išlošių pasikliautiniai $95%$ intervalai. Ištirkite tikimybes su skirtingais $n$, pvz. $n={1,2,5,10,20,100}$. Kaip atrodo balanso tankis? Kai $n=100$.
 
 Ekspermento funkcija:
 ```{r}
 experiment <- function(size){
-  sum(sample(c(12,-10), size, replace=TRUE)) #apibrėžiama ekspermento funkcija
+  sum(sample(c(12,-10), size, replace=TRUE))#apibrėžiama ekspermento funkcija
   }
 ```
 
-Skaičiuojamos tikimybės:
+Skaičiuojamos tikimybės turėti teigiamą balancą:
 ```{r}
-#n={1,2,5,10,20,100}
 h1=replicate(10000,experiment(1))#pakartojamas ekspermentas 10000kartų, kai n=1
-mean(h1>0)#suskaičiuojama tikimybė turėti teigiamą balansą
-h2=replicate(10000,experiment(2))
-mean(h2>0)
-h5=replicate(10000,experiment(5))
-mean(h5>0)
-h10=replicate(10000,experiment(10))
-mean(h10>0)
-h100=replicate(10000,experiment(100))
-mean(h100>0)
+mean(h1>0)                       #suskaičiuojama tikimybė turėti teigiamą balancą
+h2=replicate(10000,experiment(2))#pakartojamas ekspermentas 10000kartų, kai n=2
+mean(h2>0)                       #suskaičiuojama tikimybė turėti teigiamą balancą
+h5=replicate(10000,experiment(5))#pakartojamas ekspermentas 10000kartų, kai n=2
+mean(h5>0)                       #suskaičiuojama tikimybė turėti teigiamą balancą
+h10=replicate(10000,experiment(10))#pakartojamas ekspermentas 10000kartų, kai n=2
+mean(h10>0)                        #suskaičiuojama tikimybė turėti teigiamą balancą
+h100=replicate(10000,experiment(100))#pakartojamas ekspermentas 10000kartų, kai n=2
+mean(h100>0)                         #suskaičiuojama tikimybė turėti teigiamą balancą
+
+```
+
+Bendru atveju skaičiuojamos tikimybės visiems n turėti teigiamą balancą:
+```{r}
+n=c(1,2,5,10,20,100)
+mean(replicate(10000, experiment(n))>0)
 ```
 
 Išlošio pasikliautinis intervalas 95%, kai n=100:
 ```{r}
 quantile(h100, 0.025)#nurodomas kvantilis
 quantile(h100, 0.975)#nurodomas kvantilis
-
 ```
 
 Balanso tankis, kai n=100:
