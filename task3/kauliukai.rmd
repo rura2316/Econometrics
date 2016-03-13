@@ -3,14 +3,14 @@ title: "Kauliukai"
 output: html_document
 authot: Rūta Radavičiūtė
 ---
-Užduotis:
+**Užduotis:**
 Pirmasis žaidėjas meta vieną kauliuką ir fiksuojamas atsivertusių taškų skaičius. Antrasis žaidėjas meta du klausiukus ir fiksuojamas dydis: $\max(x_1, x_2)-1$, kur $x_1$ ir $x_2$ žymi pirmojo ir antrojo kauliukų iškritusių akių skaičių. Jeigu žaidėjų gautų taškų skaičiai yra lygus, tai ekspermentas kartojamas iš naujo (ir taip kartojama tol, kol galiausiai nustatomas laimėtojas). Kokia tikimybė laimėti pirmajam žaidėjui?
 
 Kauliukų metimo funkcija:
 ```{r}
 rollDice <- function(NDice){
   if(NDice==1){    
-  return(sample(6, size=1))} #pirmo žaidėjo taškų skaičius
+  return(sample(6, size=1))}                        #pirmo žaidėjo taškų skaičius
   else {
   return(max(sample(6, size=2, replace = TRUE)-1))} #antro žaidėjo taškų skaičius
   
@@ -23,8 +23,8 @@ experiment<-function(){
   zaid1=rollDice(1) #fiksuojamas pirmo žaidėjo taškų skaičius
   zaid2=rollDice(2) #fiksuojamas antro žaidėjo taškų skaičius
     while(zaid1==zaid2){ 
-#jei žaidėjų taškų skaičius sutampa ekspermentą kartojame,
-#kol taškų saičius skirsis ir galėsime nustatyti laimėtoją
+                    #jei žaidėjų taškų skaičius sutampa ekspermentą kartojame,
+                    #kol taškų saičius skirsis ir galėsime nustatyti laimėtoją
     zaid1=rollDice(1)
     zaid2=rollDice(2)
     }
