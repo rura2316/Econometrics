@@ -1,0 +1,118 @@
+
+---
+title: "Task4"
+output: html_document
+author: Rūta Radavičiūtė
+---
+**Užduotis:**
+Aplanke task4 yra duomenų failas, kuriame rasite nekilnojamo turto (o tiksliau gyvenamųjų butų) kainas ir kaikurias jų charakteristikas. Jūsų užduotis atlikti išsamią tiesinę regresiją. Lygtis reikalinga prekyboms agentams, kad geriau suprastų kokią įtaką skirtingos charakteristikos daro galutinei kainai.
+
+Nuskaitomi duomenys:
+```{r}
+getwd()#pažiūrime direktorija, kur yra mūsų failas
+file.exists("data.csv")#įsitikiname ar failas "data.csv" tikrai egzistuoja
+dat <- read.csv2("data.csv")#nuskaitomi duomenys
+attach(dat)
+summary(dat)#peržvelge duomenys
+```
+
+Pažiūrime ar duomenys koreliuoja:
+```{r}
+cor(dat)#galime matyti,kad šilomos laidumas ir garso izoliacija koreliuoja
+```
+
+Atskirai tikriname koreliacija tarp garso izoliacijos ir šilumos laidumo:
+```{r}
+cor(silumosLaidumas,garsoIzoliacija)
+#koreliacija yra labai stipri 
+plot(silumosLaidumas,garsoIzoliacija)#koreliacija šių dviejų dydžių grafiškai
+```
+
+Pirma pažiūrime kaip atrodytų modelis su įtrauktais abiem šiais koreliuotais kintamaisiais:
+```{r}
+library(car)
+mod1 <- lm(kaina ~ plotas+aukstas+silumosLaidumas+garsoIzoliacija+atstumasIkiPrekybosCentro, data = dat)
+summary(mod1)
+```
+
+Paikriname multikoliniarumo problemą, matome, kad šilumos laidumo ir garso izoliacijos VIF'ai yra ~11, vadinasi modelyje egzistuoja multikolinerumas. Dar kartą įsitikinome, kad šie kintamieji koreliuoja:
+```{r}
+vif(mod1)
+```
+
+Sukuriamas naujas parametras izoliacija t.y.(garso izoliacijos ir šilumos laidumo vidurkis):
+```{r}
+izoliacija= (dat[,4] + dat[,5])/2
+```
+
+Sukuriamas naujas dat1:
+```{r}
+dat1=dat[,c(-4,-5)]#ištrinami stulpeliai garsoIzoliacija ir silumosLaidumas
+dat1[,"izoliacija"]<-izoliacija #pridedamas naujas stulpelis izoliacija
+```
+
+Sukuriamas tiesinis modelis be koreliuotų dydžių:
+```{r}
+mod2<-lm(kaina ~ plotas + aukstas + izoliacija + atstumasIkiPrekybosCentro, data=dat1)
+summary(mod2)
+par(mfrow=c(2,2))
+plot(mod2)
+```
+
+Tikriname išskirtis su influence.measures, parametras cook.d (*) parodo išskirtis:
+```{r}
+mod3<-lm(kaina ~ plotas)
+summary(influence.measures(mod3))#253 ir 254 eilutėje yra išskirtys
+par(mfrow=c(2,2))
+plot(mod3)
+mod4<-lm(kaina ~ aukstas)
+summary(influence.measures(mod4))#neturi išskirčių
+mod5<-lm(kaina ~ izoliacija)
+summary(influence.measures(mod5))#neturi išskirčių
+mod6<-lm(kaina ~ atstumasIkiPrekybosCentro)
+summary(influence.measures(mod6))#neturi išskirčių
+```
+
+Sukuriamas naujas dat2 be 253 ir 254 eilučių:
+```{r}
+dat2=dat1[c(-253,-254),]#pašalinamos išskirtys
+```
+
+Sukuriamos tiesinis modelis be išskirčių:
+```{r}
+mod7<-lm(kaina ~ plotas + aukstas + izoliacija + atstumasIkiPrekybosCentro, data=dat2)
+summary(mod7)
+#matome, kad atstumas iki prekybos centro nereikšmingas,vadinasi galima, jį išmesti
+```
+
+Sukuriamas dat3 be atstumo iki prekybos centro:
+```{r}
+dat3=dat2[,c(-4)]#pašalinamas atstumas iki prekybos centro
+```
+
+Sukuriamas galutinis modelis:
+```{r}
+mod<-lm(kaina ~ plotas + aukstas + izoliacija, data=dat3)
+summary(mod)#visi parametrai reikšmingi
+par(mfrow=c(2,2))
+plot(mod6)
+```
+
+Turint galutinų modelį reikia užtikrinti, kad modelis geras ir nepasireiškė galimos blogybės:
+
+1.Išskirtys
+```{r}
+summary(influence.measures(mod))#išskirčių nėra
+```
+2.Multikoliniarumas
+```{r}
+vif(mod)#nėra multikoliniarumos problemos
+```
+3.Heteroskedastiškumas
+```{r}
+ncvTest(mod)#p=0,1045487>0,05 H0 atmesti negalime, vadinasi modelis geras t.y(duomenys homoskedastiški)
+```
+4.Autokoreliacija
+```{r}
+durbinWatsonTest(mod)#p-value=0,296>0,05, H0 atmesti negalime, vdinasi modelyje nėra autokorelecijos problemos
+```
