@@ -60,4 +60,4 @@ res<-as.vector(b$residuals)
 shapiro.test(res)#H0 priimam, nes p-value = 0.4431>0.05, vadinasi galime teigti, jog liekanos normalios
 ```
 
-
+Išvada: remiantis darbo rezultatais, galime teigti, kad iš sudarytų modelių b modelis yra tiksliausias
