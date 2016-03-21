@@ -20,6 +20,11 @@ Ieškomas balancas:
 balansas<-replicate(1000,rulete()) #kartojame 1000kartų
 ```
 
+Balanco reikšmių pasiskirstymas:
+```{r}
+hist(balansas, main="Balanso histograma",xlab="Laimėjimas", ylab="Reikšmės pasikartojimas", col="blue") 
+```
+
 Tikimybė, kad balansas bus teigiamas:
 ```{r}
 mean(balansas>0)

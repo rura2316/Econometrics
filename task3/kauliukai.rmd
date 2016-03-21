@@ -23,8 +23,8 @@ experiment<-function(){
   zaid1=rollDice(1) #fiksuojamas pirmo žaidėjo taškų skaičius
   zaid2=rollDice(2) #fiksuojamas antro žaidėjo taškų skaičius
     while(zaid1==zaid2){ 
-                    #jei žaidėjų taškų skaičius sutampa ekspermentą kartojame,
-                    #kol taškų saičius skirsis ir galėsime nustatyti laimėtoją
+                    #jei žaidėjų taškų skaičius sutampa ekspermentą kartojame,
+                    #kol taškų saičius skirsis ir galėsime nustatyti laimėtoją
     zaid1=rollDice(1)
     zaid2=rollDice(2)
     }
