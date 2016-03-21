@@ -12,15 +12,16 @@ getwd()#pažiūrime direktorija, kur yra mūsų failas
 file.exists("data.csv")#įsitikiname ar failas "data.csv" tikrai egzistuoja
 dat <- read.csv2("data.csv")#nuskaitomi duomenys
 attach(dat)
-summary(dat)#peržvelge duomenys
+head(dat)#perzvengiamia duomenis
+plot(dat)
 ```
 
-Pažiūrime ar duomenys koreliuoja:
+Tikriname ar duomenys koreliuoja:
 ```{r}
 cor(dat)#galime matyti,kad šilomos laidumas ir garso izoliacija koreliuoja
 ```
 
-Atskirai tikriname koreliacija tarp garso izoliacijos ir šilumos laidumo:
+Pažiūrime atskirai koreliacija tarp garso izoliacijos ir šilumos laidumo:
 ```{r}
 cor(silumosLaidumas,garsoIzoliacija)
 #koreliacija yra labai stipri 
@@ -39,7 +40,7 @@ Paikriname multikoliniarumo problemą, matome, kad šilumos laidumo ir garso izo
 vif(mod1)
 ```
 
-Sukuriamas naujas parametras izoliacija t.y.(garso izoliacijos ir šilumos laidumo vidurkis):
+Sukuriamas naujas parametras izoliacija t.y.(garso izoliacijos ir šilumos laidumo vidurkis), nes šie du parametrai apibūdina izoliacija:
 ```{r}
 izoliacija= (dat[,4] + dat[,5])/2
 ```
@@ -61,7 +62,7 @@ plot(mod2)
 Tikriname išskirtis su influence.measures, parametras cook.d (*) parodo išskirtis:
 ```{r}
 mod3<-lm(kaina ~ plotas)
-summary(influence.measures(mod3))#253 ir 254 eilutėje yra išskirtys
+summary(influence.measures(mod3))#253 ir 254 eilutėse yra išskirtys
 par(mfrow=c(2,2))
 plot(mod3)
 mod4<-lm(kaina ~ aukstas)
@@ -105,13 +106,31 @@ summary(influence.measures(mod))#išskirčių nėra
 ```
 2.Multikoliniarumas
 ```{r}
-vif(mod)#nėra multikoliniarumos problemos
+vif(mod)#nera multikoliniarumos problemos, nes kintamuju koeficientai mazesni nei 10
 ```
 3.Heteroskedastiškumas
 ```{r}
+par(mfrow=c(1,1))
+plot(mod$res~mod$fitted, main="Liekanų išsibarstymas pagal reikšmes")#išbrėžiamos liekanos
 ncvTest(mod)#p=0,1045487>0,05 H0 atmesti negalime, vadinasi modelis geras t.y(duomenys homoskedastiški)
 ```
 4.Autokoreliacija
 ```{r}
 durbinWatsonTest(mod)#p-value=0,296>0,05, H0 atmesti negalime, vdinasi modelyje nėra autokorelecijos problemos
 ```
+5.Liekanų normalumas
+```{r}
+hist(mod$res, probability=TRUE, main="Liekanų histograma") #isbreziama histograma
+lines(density(mod$res), col="red") #liekanu tankio grafikas
+shapiro.test(mod$res) #testas, kuris nustato paklaidu normaluma
+#p-value= = 0.1018 >0.05 H0 atmesti negalime, vadinasi paklaidos yra normalios
+```
+6."R-Squared" ir "Akaike's Information Criteria":
+```{r}
+(summary(mod))$r.squared #kuo arciau 1, tuo modelis patikimesnis. 
+AIC(mod)
+summary(mod)
+```
+
+Išvados:
+Galime teigti, kad modelis $kaina=~plotas+aukstas+izoliacija$ yra geras, nes nepasireiškia galimos blogybės. Atitinkamai įverčiai parodo kaip pakitus vienam vienetui iš šių charakteristikų, pakinta kaina: $kaina=7639.00  + 599.69*plotas+328.05*aukstas+567.14 *izoliacija+e$
