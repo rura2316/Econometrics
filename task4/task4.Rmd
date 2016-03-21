@@ -129,8 +129,7 @@ shapiro.test(mod$res) #testas, kuris nustato paklaidu normaluma
 ```{r}
 (summary(mod))$r.squared #kuo arciau 1, tuo modelis patikimesnis. 
 AIC(mod)
-summary(mod)
 ```
 
 Išvados:
-Galime teigti, kad modelis $kaina=~plotas+aukstas+izoliacija$ yra geras, nes nepasireiškia galimos blogybės. Atitinkamai įverčiai parodo kaip pakitus vienam vienetui iš šių charakteristikų, pakinta kaina: $kaina=7639.00  + 599.69*plotas+328.05*aukstas+567.14 *izoliacija+e$
+Galime teigti, kad modelis $kaina=plotas+aukstas+izoliacija$ yra geras, nes nepasireiškia galimos blogybės. Atitinkamai įverčiai parodo kaip pakitus vienam vienetui iš šių charakteristikų, pakinta kaina: $kaina=7639.00  + 599.69*plotas+328.05*aukstas+567.14 *izoliacija+e$
