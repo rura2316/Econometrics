@@ -1,0 +1,63 @@
+---
+title: "Task5"
+output: html_document
+author: Rūta Radavičiūtė
+---
+**Užduotis:**
+Pinigų paklausa. Šioje užduotyje reikia atlikti tiesinę regresiją. Pakete dynlm yra duomenų masyvas M1Germany - ten yra ir jo aprašymas. Iš turimų duomenų sudarykite ir įvertinkite tiesinę regresiją, kurios endoneninis kintamasis yra logm1. Lygtis būtų naudojama prognozuoti pinigų kiekį artimiausiam laikotarpiui į prieki remiantis dabartine situacija. Taigi prognozės sudarymui lygtis gali naudoti tik tuos duomenis, kurie būtų žinomi prognozavimo momentu.
+
+Nuskaitomi duomenys:
+```{r, message=FALSE}
+library(dynlm)
+summary(M1Germany)#perzvelgiami duomenys
+plot(M1Germany)#ziuredami i grafika galime teigti, kad isskirciu nera
+```
+
+Sudarome modelius prognozuoti pinigų kiekį artimiausiam laikotarpiui į prieki remiantis dabartine situacija:
+```{r}
+a<-dynlm((logm1)~(L(logprice,2))+(L(loggnp,2))+(L(interest,2)),data=M1Germany,star=c(1960,1),end=c(1996,3))
+b1<-dynlm((logm1)~(L(logprice,4))+(L(loggnp,4))+(L(interest,4)),data=M1Germany,star=c(1960,1),end=c(1996,3))
+b<-dynlm((logm1)~(L(logprice,4))+(d(L(loggnp,4)))+(L(interest,4)),data=M1Germany,star=c(1960,1),end=c(1996,3))
+#panaikinome loggnp nario trenda t.y liko tik pokytis
+c<-dynlm((logm1)~(L(logprice,1))+(L(interest,1)),data=M1Germany,star=c(1960,1),end=c(1996,3))
+d<-dynlm((logm1)~(L(logprice,3))+(L(interest,3)),data=M1Germany,star=c(1960,1),end=c(1996,3))
+e<-dynlm((logm1)~(L(logprice,5))+(L(interest,5)),data=M1Germany,star=c(1960,1),end=c(1996,3))
+```
+
+Visi kintamiejo reikšmingi:
+```{r}
+summary(a)
+summary(b1)
+summary(b)
+summary(c)
+summary(d)
+summary(e)
+```
+Geriausias modelis yra b, nes jo R-squared:  0.982 yra didžiausias
+
+Lyginame modelius:
+```{r}
+AIC(a)
+AIC(b1)
+AIC(b)
+AIC(c)
+AIC(d)
+AIC(e)
+```
+Geriasuias modelis yra b, nes jo AIC(b)= -505.3912 yra mažiausias
+
+Tikrinam multikoliniaruma:
+```{r}
+library(car)
+vif(b)#nera multikoliniarumo problema
+```
+
+Tikriname ar liekanos normalios:
+```{r}
+hist(resid(b), probability=TRUE)
+lines(density(resid(b)), col="red")#grafiskai liekanos atrodo normalios
+res<-as.vector(b$residuals)
+shapiro.test(res)#H0 priimam, nes p-value = 0.4431>0.05, vadinasi galime teigti, jog liekanos normalios
+```
+
+
