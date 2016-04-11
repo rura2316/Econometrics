@@ -1,0 +1,51 @@
+---
+title: "task7(1)"
+output: html_document
+author: Rūta Radavičiūtė
+---
+
+##Lab Session 2
+
+1. The function tsdisplay(data, plot.type="scatter") is useful
+for showing a time plot, ACF plot and lagged scatterplot on the
+same graph. Use it to produce plots of the following time series:
+bricksq, hsales, ibmclose
+Can you spot the effects of seasonality, cyclicity and trend?
+
+
+```{r, message=FALSE}
+library(fpp)#naudojama fpp biblioteka
+```
+
+**Bricksq:**
+```{r}
+tsdisplay(bricksq, plot.type="scatter")
+```
+
+1.Sezoniškumas matosi dėl trumpų kilimų ir kritimų kievienais metais.
+
+2.Ciklas motosi kelių metų bendras kilimas ir staigus kritimas.Pirmas ciklas 1955-1975m., antras ciklas 1975-1983m., trečias ciklas 1983-1991m. ir toliau prasideda ketvirtas ciklas.
+
+3.Kylimo trendas matosi iki 1975m., vėliau vyksta svyravimai.
+
+**Hsales:**
+```{r}
+tsdisplay(hsales, plot.type="scatter")
+```
+
+1.Sezoniškumas matosi dėl stagių kilimų ir kritimų kiekvienais metais.
+
+2.Ciklas motosi kelių metų bendras kilimas ir bendras kritimas. Pirmas ciklas 1975-1983m. ir antras ciklas 1983-1991m.ir toliau prasideda trečias ciklas.
+
+3.Trendo nėra, svyravymai vyksta vienodame lygyje.
+
+**Ibmclose:**
+```{r}
+tsdisplay(ibmclose, plot.type="scatter")
+```
+
+1.Sezoniškumo nėra.
+
+2.Ciklas motosi bendruose kilimuose ir kritimas.Pirmas ciklas 0-40, antras ciklas 40-280 ir trečias 280-360.
+
+3.Trendo nėra.

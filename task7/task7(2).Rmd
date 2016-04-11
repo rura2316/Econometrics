@@ -1,0 +1,99 @@
+---
+title: "task7(2)"
+output: html_document
+author: Rūta Radavičiūtė
+---
+##Lab Session 2
+
+2. For each of the same series (bricksq, ibmclose, hsales):
+
+```{r, message=FALSE}
+library(fpp)#naudojama fpp biblioteka
+```
+(a) Use either the naive or seasonal naive forecasting method and
+apply it to the full data set.
+
+**bricksq**
+```{r}
+par(mfrow=c(2,1))
+#Naive:
+naive1<-naive(bricksq, h=20)
+plot(naive1)
+#Seasonal naive:
+seasonal1<-snaive(bricksq, h=20)
+plot(seasonal1)
+```
+
+Tikėtina, kad atlikta geresnė prognoze Seasonal naive modotu, nes ji atsižvelgia į prieš tai buvusi sezoniškumą.
+
+**ibmclose**
+```{r}
+par(mfrow=c(2,1))
+#Naive:
+naive2<-naive(ibmclose, h=20)
+plot(naive2)
+#Seasonal naive:
+seasonal2<-snaive(ibmclose, h=20)
+plot(seasonal2)
+```
+
+Nėra prasmės naudoti Seasonal naive prognozavimo metodo, nes nėra sezonų, vadinasi tikėtina, kad geresnė prognozė yra atlikta Naive metodu.
+
+**hsales**
+```{r}
+par(mfrow=c(2,1))
+#Naive:
+naive3<-naive(hsales, h=20)
+plot(naive3)
+#Seasonal naive:
+seasonal3<-snaive(hsales, h=20)
+plot(seasonal3)
+```
+
+Tikėtina, kad atlikta geresnė prognoze Seasonal naive modotu, nes ji atsižvelgia į prieš tai buvusi sezoniškumą.
+
+(b) Compute the residuals and plot their ACF. Do the residuals
+appear to be white noise? What did your forecasting method
+miss?
+```{r}
+res1<-residuals(seasonal1) #Seasonal metodo prognozes liekanos (bricksq duomenu)
+Acf(res1)                  #Liekanų ACF
+```
+
+ACF grafikas rodo reikšminga autokoreliacija, nes dalis reikšmių kerta mėlyną punktūrinę liniją. Liekanos nėra baltasis triukšmas. Matomas ryškus sezoniškumas.
+Metodui galbūt reikia pridėti sezoniškumą, kad liekanos būtų artimos  baltajam triukšmui arba liekanos būtų balstasis triukšmas. Kitu atveju pridėjus sezoniškumą gausime kitas reikšmes.
+
+```{r}
+res2<-residuals(naive2)  #Naive metodo prognozes liekanos (ibmclose duomenu)
+Acf(res2)                #Liekanų ACF
+```
+
+AFC grafikas rodo, kad  nėra reikšmingos autokoreliacija. Galima teigti, kad liekanos yra artimos baltajam triukšmui. Kadangi liekanos beveik baltasis triukšmas modelį pagerintį būtų sudėtinga.
+
+```{r}
+res3<-residuals(seasonal3)  #Seasonal metodo prognozes liekanos (hsales duomenu)
+Acf(res3)                   #Liekanų ACF
+```
+
+AFC grafikas rodo reikšminga autokoreliacija, liekanos nėra baltasis triukšmas.
+Metodui galbūt reikia pridėti cikliškumą, kad liekanos būtų artimos  baltajam triukšmui arba liekanos būtų balstasis triukšmas. Kitu atveju pridėjus cikliškumą gausime kitas reikšmes.
+
+(c) Do a Ljung-Box test on the residuals. What do the results
+mean?
+
+H0: liekanos yra baltasis triukšmas
+
+H1: liekanos nėra baltasis triukšmas
+
+```{r}
+Box.test(res1,fitdf=0, type="Lj")
+```
+p-value < 2.2e-16 <0.05, vadinasi H0 atmetama. Galima teigti, kad liekanos nėra baltasis triukšmas.
+```{r}
+Box.test(res2,fitdf=0, type="Lj")
+```
+p-value = 0.09929 >0.05, vadinasi H0 neatmetama. Galima teigti, kad liekanos yra baltasis triukšmas.
+```{r}
+Box.test(res3, fitdf=0, type="Lj")
+```
+p-value < 2.2e-16 < 0.05, vadinasi H0 atmetama. Galima teigti, kad liekanos nėra baltasis triukšmas.

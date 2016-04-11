@@ -1,0 +1,87 @@
+---
+title: "task7(4)"
+output: html_document
+author: Rūta Radavičiūtė
+---
+
+##Lab Session 2
+
+4. Consider the daily closing IBM stock prices (data set ibmclose).
+```{r, message=FALSE}
+library(fpp)#naudojama fpp biblioteka
+```
+(a) Produce some plots of the data in order to become familiar
+with it.
+```{r}
+tsdisplay(ibmclose,plot.type="scatter")
+```
+
+1.Sezoniškumas matosi dėl trumpų kilimų ir kritimų kievienais metais.
+
+2.Ciklas motosi kelių metų bendras kilimas ir staigus kritimas.Pirmas ciklas 1955-1975m., antras ciklas 1975-1983m., trečias ciklas 1983-1991m. ir toliau prasideda ketvirtas ciklas.
+
+3.Kylimo trendas matosi iki 1975m., vėliau vyksta svyravimai.
+
+(b) Split the data into a training set of 300 observations and a test
+set of 69 observations.
+```{r}
+ibm1 <- window(ibmclose,start= 1, end=300.99)
+ibm2<-window(ibmclose, start=301, end=369)
+```
+
+(c) Try various benchmark methods to forecast the training set and
+compare the results on the test set. Which method did best?
+```{r}
+#Mean:
+fit1 <- meanf(ibm1,h=70)
+plot(fit1)
+accuracy(fit1, ibm2)
+#Drift:
+fit2 <- rwf(ibm1,h=70, drift=TRUE)
+plot(fit2)
+accuracy(fit2, ibm2)
+#Naive:
+fit3 <- naive(ibm1,h=70)
+plot(fit3)
+accuracy(fit3, ibm2)
+#Seasonal naive:
+fit4 <- snaive(ibm1,h=70)
+plot(fit4)
+accuracy(fit4, ibm2)
+```
+
+Matome, kad Seasonal naive ir Naive prognozių Training set ir Test set rodmenys poromis sutampa. 
+
+Taip pat matome, kad nėra modelio, kuris tiksliai prognozuotų, nes visų keturių Training set ir Test set reikšmės skiriasi, todėl sunku daryti prielaidos kuris modelis yra geresnis. Tačiau galima pastebėti, kad Drift ir Naive metodu funkcijos accurary koeficientai yra mažesni,o tai reiškia, kad modeliai yra geresni nei Mean metodo modelis.
+
+
+```{r,echo=FALSE,warning=FALSE}
+plot(ibmclose)
+lines(fit1$mean, col="2", lwd="2")
+lines(fit2$mean, col="3", lwd="2")
+lines(fit3$mean, col="4", lwd="3")
+lines(fit4$mean, col="5", lwd="2")
+
+legend("bottomleft",lty=1,lwd="2",col=c(2,3,4,5),legend=c("Mean metodas","Drift metodas","Naive metodas","Seasonal metodas"))
+```
+
+Iš grafiko matome, kad prognozės nėra tikslios tikriems duomenims. Tačiau galima teigti, kad tiksliausiai prognozuoja Drift metodas, nes jo prognozė yra arčiausiai tikrųjų reikšmių.
+
+(d) For the best method, compute the residuals and plot them.
+What do the plots tell you?
+```{r}
+plot(fit2$res)
+hist(fit2$res, breaks="FD")
+Acf(fit2$res)
+Box.test(fit2$res, fitdf=0, type="Lj")
+```
+
+* Iš grafiko matome, kad liekanos nesvyruoja apie 0. Prognozė nėra tiksli, nes liekanos didelės. 
+* Iš histogramos matome, kad liekanos pasiskirsčiusios pagal normalųjį skirstinį. 
+* AFC grafikas rodo reikšminga autokoreliacija, liekanos nėra baltasis triukšmas.
+* Box.test p-value = 0.01888 < 0.05, vadinasi H0 atmetama. Galima teigti, kad liekanos nėra baltasis triukšmas.
+
+(e) Can you invent a better forecasting method than any of the
+benchmark methods for these data?
+
+Galima sugalvoti geresnį prognozavimo metodą, nes liekanos nėra baltasis triukšmas ir užduotyje naudoti metodai yra patys paprasčiausi.
