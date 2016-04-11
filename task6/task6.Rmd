@@ -1,0 +1,73 @@
+---
+title: "task6"
+output: html_document
+author: Rūta Radavičiūtė
+---
+
+**Lab Session 1**
+
+1. Use the Dow Jones index (data set dowjones) to do the following:
+
+```{r, message=FALSE}
+library(fpp)#naudojama fpp biblioteka
+```
+
+(a) Produce a time plot of the series:
+```{r}
+plot(dowjones, main= "Dow Jones duomenys",xlab="Time", ylab="Dow Jones index", col="darkgreen")
+```
+
+(b) Produce forecasts using the drift method and plot them:
+```{r}
+drift<-rwf(dowjones, drift=TRUE, h=20)
+plot(drift, main="Dow Jones duomenys",xlab="Time",ylab="Dow Jones index", col="darkgreen")
+legend("topleft",lty=1,col="blue",legend="Drift metodas")
+```
+
+(c) Show that the graphed forecasts are identical to extending the
+line drawn between the first and last observations:
+```{r}
+plot(dowjones, main= "Dow Jones duomenys",xlab="Time", ylab="Dow Jones index", col="darkgreen")
+y1<-dowjones[1]
+y2<-dowjones[78]
+x1=1
+x2=78
+#Lygtis:
+#y1=a+bx1
+#y2=a+bx2
+#Isreiksti koeficientai a ir b
+a=y1-((y2-y1)/(x2-x1))*x1
+b=((y2-y1)/(x2-x1))
+abline(a,b, col="red")
+legend("topleft",lty=1,col=c("red", "blue"),legend=c("Tiese tarp pirmo ir paskininio stebejimu","Drift metodas"))
+```
+
+(d) Try some of the other benchmark functions to forecast the same
+data set. Which do you think is best? Why?:
+
+```{r}
+#Seasonal naive:
+plot(dowjones,xlim=c(0,100), main="Dow Jones duomenys",xlab="Time", ylab="Dow Jones index", col="darkgreen")
+seasonal<-snaive(dowjones, h=20)
+lines(seasonal$mean,col="yellow",lwd="2")
+legend("topleft",lty=1,lwd="2",col="yellow",legend=c("Seasonal metodas"))
+```
+
+Matome, kad sezoniškumo nėra, vadinasi ši prognozė nėra tinkama.
+
+```{r}
+plot(dowjones,xlim=c(0,100), main="Dow Jones duomenys",xlab="Time", ylab="Dow Jones index", col="darkgreen")
+#Mean: 
+mean<-meanf(dowjones, h=20)
+lines(mean$mean,col="pink",lwd="2")
+#Naive:
+naive<-naive(dowjones, h=20)
+lines(naive$mean,col="grey",lwd="2")
+#Drift:
+drift<-rwf(dowjones, drift=TRUE, h=20)
+lines(drift$mean,col="blue",lwd="2")
+legend("topleft",lty=1,lwd="2",col=c("pink","grey","blue"),legend=c("Mean metodas","Naive metodas","Drift metodas"))
+```
+
+
+Naive metodo prognozė tikėtina yra tiksliausia, nes atsižvelgia į paskutinę reikšmę. Mean metodo prognozė mažai tikėtina dėl prognozuojamo staigaus kritimo. Drift metodo prognozė taip pat mažiau tikėtina dėl prognozuojamo kylimo,nes atsižvelgiama tik į ilgą laiką buvusi kylimą ir neatsižvelgiama į dabartinį kritimą.
