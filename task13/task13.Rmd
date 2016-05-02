@@ -1,0 +1,133 @@
+---
+title: "task13"
+output: html_document
+author: Rūta Radavičiūtė
+---
+
+**Lab Session 6**
+
+_____________
+* **1 Užduotis:** For the following series, find an appropriate Box-Cox transformation
+and order of differencing in order to obtain stationary data.
+```{r, message=FALSE}
+library(fpp)#naudojama fpp biblioteka
+```
+
+**a) usnetelec**
+```{r,warning=FALSE}
+usn<-usnetelec
+plot(usn, main="Orginalūs usnetelec duomenys") #duomenys nesezoniniai
+l1<-BoxCox.lambda(usn) #transformacijos lambda 0.516
+n1<-ndiffs(usn)        #diferenciavimo eile 1
+plot(diff(BoxCox(usn, lambda=l1),differences=n1),col=2, main="BoxCox transformti ir 1 karta diferencijuoti duomenys")
+#H0: duomenys yra stacionarus ir nesezoniniai
+kpss.test(diff(BoxCox(usn, lambda=l1),differences=n1)) 
+#p-vaule < 0.05, vadinasi H0 atmetame. Duomenys nera stacionarus.
+```
+
+Box-cox transformuoti ir 1 kartą diferencijuoti duomenys nėra stacionarūs. Dėl to reikia diferencijuoti dar vieną kartą.
+
+```{r,warning=FALSE}
+plot(diff(BoxCox(usn, lambda=l1),differences=2),col=7, main="BoxCox transformti ir 2 kartus diferencijuoti duomenys")
+#H0: duomenys yra stacionarus ir nesezoniniai
+kpss.test(diff(BoxCox(usn, lambda=l1),differences=2)) 
+# p-vaule > 0.05,vadinasi H0 neatmetame. Duomenys yra stacionarus.
+```
+
+Box-cox transformuoti ir 2 kartus diferencijuoti duomenys yra stacionarūs.
+
+**b) usgdp**
+```{r,warning=FALSE}
+usg<-usgdp
+plot(usg, main="Orginalūs usgdp duomenys") #duomenys nesezoniniai
+l2<-BoxCox.lambda(usg) #transformacijos lambda 0.366
+n2<-ndiffs(usg)        #diferenciavimo eile 2
+plot(diff(BoxCox(usg, lambda=l2),differences=n2),col=3,main="BoxCox transformti ir 2 kartus diferencijuoti duomenys")
+#H0: duomenys yra stacionarus ir nesezoniniai
+kpss.test(diff(BoxCox(usg, lambda=l2),differences=n2))
+# p-vaule > 0.05 H0 neatmetame. Duomenys yra stacionarus.
+```
+
+Box-cox transformuoti ir 2 kartus diferencijuoti duomenys yra stacionarūs.
+
+**c) mcopper**
+```{r,warning=FALSE}
+mco<-mcopper
+plot(mco,main="Orginalūs mcopper duomenys")
+acf(mco) #duomenys nesezoniniai
+l3<-BoxCox.lambda(mco) #transformacijos lambda 0.191
+n3<-ndiffs(mco)        #diferenciavimo eile 1
+plot(diff(BoxCox(mco, lambda=l3),differences=n3),col=4, main="BoxCox transformti ir 1 karta diferencijuoti duomenys")
+#H0: duomenys yra stacionarus ir nesezoniniai
+kpss.test(diff(BoxCox(mco, lambda=l3),differences=n3))
+# p-vaule > 0.05 H0 neatmetame. Duomenys stacionarus.
+```
+
+Box-cox transformuoti ir 1 karta diferencijuoti duomenys yra stacionarūs.
+
+**d) enplanements**
+```{r,warning=FALSE}
+enp<-enplanements
+plot(enp, main="Orginalūs enplanements duomenys")
+acf(enp)#duomenys panasus i sezoninius
+l4<-BoxCox.lambda(enp) #transformacijos lambda -0.226
+n4<-nsdiffs(enp)        #diferenciavimo eile 1 (sezoniniams duomenims)
+plot(diff(BoxCox(enp, lambda=l4),differences=n4),col=5,main="BoxCox transformti ir 1 karta diferencijuoti duomenys" )
+#H0: duomenys yra stacionarus ir nesezoniniai
+kpss.test(diff(BoxCox(enp, lambda=l4),differences=n4)) 
+# p-vaule >0.05 H0 priimame. Duomenys stacionarus.
+```
+
+Box-cox transformuoti ir 1 karta diferencijuoti duomenys yra stacionarūs.
+
+**e) visitors**
+```{r,warning=FALSE}
+vis<-visitors
+plot(vis, main="Orginalūs visitors duomenys")
+acf(vis)#duomenys sezoniniai
+l5<-BoxCox.lambda(vis) #transformacijos lambda 0.277
+n5<-nsdiffs(vis)        #diferenciavimo eile 1 (sozininiams duomenims)
+plot(diff(BoxCox(vis, lambda=l5),differences=n5),col=6,main="BoxCox transformti ir 1 karta diferencijuoti duomenys")
+#H0: duomenys yra stacionarus ir nesezoniniai
+kpss.test(diff(BoxCox(vis, lambda=l5),differences=n5)) 
+# p-vaule >0.05 H0 priimame. Duomenys stacionarus.
+```
+
+Box-cox transformuoti ir 1 karta diferencijuoti duomenys yra stacionarūs.
+
+* **Išvados: Galima matyti, kad pritaikius Box-cox transformaciją duomenų svyravimus padaro reguliaresniais,o pritaikius diferenciavimą duomenys tampa stacionarius(kartais gali prireikti  diferiancijuoti keletą kartų). Stebimas pokytis duomenyse, o ne bendras duomenų kitimas laike.**
+
+_____________
+* **2 Užduotis:** Why is a Box-Cox transformation unhelpful for the cangas data?
+
+**cangas**
+```{r}
+can<-cangas
+plot(can, main="Orginalūs cangas duomenys")
+l6<-BoxCox.lambda(can) #transformacijos lambda 0.576
+plot(BoxCox(can,lambda=l6),main="BoxCox trasformuoti cangas duomenys",col=7)
+```
+
+* **Išvados: Box-Cox transformacija cangas duomenims yra nenaudinga,nes viduryje svyravimai didžiausi, opradžioje ir pabaigoje svyravimai mažesni, duomynys susidaro iš kelių dalių. Todėl neišeina pritaikyti trasformacijos, tinkančios visiems duomenims, nes negali duomenų padaryti reguliaresniais.**
+
+_____________
+* **3 Užduotis:** Download the data at http://robjhyndman.com/data/retail.xls. Choose one of the series and find an appropriate Box-Cox transformation and order of differencing in order to obtain stationary data.
+
+```{r,warning=FALSE}
+getwd()                       #pasakoma kurioje direktorijoje dirbama
+file.exists("retail.csv")     #isitikinama ar failas retail.csv tikrai egzistuoja
+dat1 <- read.csv("retail.csv")#nuskaitomi duomenys
+dat2=dat1[2]                  #pasirenkamas vienas is parametru (siuos atveju iskiriams antras stulpelis)
+dat3=ts(dat2,start=c(1982, 4), end=c(2007, 12), frequency=12) #duomenis is data.frame pakeiciami i timeseries
+plot(dat3, main="Orginalūs supermarket and grocery stores duomenys") #duomenys nera sezoniniai
+l7<-BoxCox.lambda(dat3)       #transformacijos lambda 0.105
+n7<-ndiffs(dat3)              #diferenciavimo eile 1
+plot(diff(BoxCox(dat3, lambda=l7),differences=n7),col=8,main="BoxCox transformti ir 1 karta diferencijuoti duomenys" )
+#H0: duomenys yra stacionarus ir nesezoniniai
+kpss.test(diff(BoxCox(dat3, lambda=l7),differences=n7)) 
+# p-vaule >0.05 H0 priimame. Duomenys yra stacionarus.
+```
+
+Box-cox transformuoti ir 1 karta diferencijuoti duomenys yra stacionarūs.
+
+* **Išvados: Galima matyti, kad pritaikius Box-cox transformaciją duomenų svyravimus padaro reguliaresniais,o pritaikius diferenciavimą duomenys tampa stacionarius(kartais gali prireikti  diferiancijuoti keletą kartų). Stebimas pokytis duomenyse, o ne bendras duomenų kitimas laike.**

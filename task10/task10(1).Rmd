@@ -1,0 +1,92 @@
+---
+title: "task10(1)"
+output: html_document
+author: Rūta Radavičiūtė
+---
+**Lab Session 3**
+
+1. For this exercise, use the price of a dozen eggs in the United States
+from 1900–1993 (data set eggs). Experiment with the various options
+in the holt() function to see how much the forecasts change
+with damped or exponential trend. Also try changing the parameter
+values for α and β to see how they affect the forecasts. Try to
+develop an intuition of what each parameter and argument is doing
+to the forecasts.
+[Hint: use h=100 when calling holt() so you can clearly see the
+differences between the various options when plotting the forecasts.]
+Which model gives the best RMSE? Do the residuals from the best model look like white noise?
+
+```{r, message=FALSE}
+library(fpp)#naudojama fpp biblioteka
+```
+
+##Geriausias modelis:
+
+**1.Exponential**
+```{r}
+fit1 <- holt(eggs, h=100, exponential=TRUE)
+plot(fit1)
+lines(fit1$fitted, col="red")
+#Smoothing parameters: alpha = 0.8249 beta  = 1e-04 
+#AIC: 1044.925
+#Error measures:
+#                    ME     RMSE      MAE       MPE     MAPE      MASE       ACF1
+#Training set 0.4089821 26.39044 19.21208 -1.317409 9.752296 0.9477032 0.01075801
+```
+
+Išbandžius įvairius modelius, šito modelio prognozė atrodo tiksliausias. Modelis duoda geriausią RMSE=26.39044. Alpha ir beta yra parenkamos automatiškai (alpha = 0.8249 beta  = 1e-04 )
+
+```{r}
+Acf(fit1$residuals)
+```
+
+Iš grafiko galima, teigti, kad liekanos atrodo kaip baltasis triukšmas.
+
+```{r}
+#H0: liekanos yra baltasis triukšmas
+#H1: liekanos nėra baltasis triukšmas
+Box.test(fit1$res, fitdf=0, type="Lj")
+```
+p-value >0.05, vadinasi H0 neatmetama. Galima teigti, kad liekanos yra baltasis triukšmas.
+
+##Kiti modeliai:
+
+**2.Damped,α,β**
+```{r}
+fit2 <- holt(eggs, h=100, damped=TRUE, alpha=0.05, beta=0.04)
+plot(fit2)
+lines(fit2$fitted, col="red")
+#AIC: 1120.605
+#Error measures:
+#                    ME     RMSE      MAE      MPE     MAPE     MASE      ACF1
+#Training set -10.88844 38.74898 30.75613 -9.23727 16.79307 1.517153 0.7092164
+```
+
+Damped prognozė atsisako ryškaus trendo esančio duomenyse. Taip pat alpha ir beta labai sugolidina duomenis ir prognozė atsilieka nuo duomenų.
+
+**3.Damped, Exponential, α,β**
+```{r}
+fit3 <- holt(eggs, h=100, damped= TRUE, exponential=TRUE, alpha=0.8, beta=0.001)
+plot(fit3)
+lines(fit3$fitted, col="red")
+#AIC: 1043.340
+#Error measures:
+#                    ME     RMSE      MAE       MPE    MAPE      MASE       ACF1
+#Training set -1.065638 26.55157 19.40773 -2.232108 9.97935 0.9573544 0.03853755
+```
+
+Damped prognozė atsisako ryškaus trendo esančio duomenyse, o exponiantial prognozė prideda eksponentini trendą ir prognozei neleidžia pasiekti neigiamų reikšmių. Parametras alpha glodina duomenis, kuo mažesnis alpha tuo prognozė yra labiau suglodinta. Parametras beta bando pagauti alpha trendą ir antrą kartą glodina duomenis.Taip pat beta koreguoja prognozę ir leidžia jai augti.
+
+**4.Exponential, α**
+```{r}
+fit4 <- holt(eggs, h=100, exponential=TRUE, alpha=0.01)
+plot(fit4)
+lines(fit4$fitted, col="red")
+#Smoothing parameters:beta  = 0.0036 
+#AIC: 1162.093
+#Error measures:
+#                    ME     RMSE      MAE       MPE     MAPE     MASE      ACF1
+#Training set -15.84774 45.39475 38.13431 -16.57176 24.05951 1.881108 0.7963922
+```
+
+Parametras alpha labai suglodina duomenis ir prognozė atsižvelgia tik į esamą trendą ir ignoruoja paskutines duomenų reikšmes. Paskutinės duomenų reikšmės ir pirmosios prognozės reikšmes nesutampa.

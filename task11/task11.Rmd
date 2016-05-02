@@ -1,0 +1,64 @@
+---
+title: "task11"
+output: html_document
+author: Rūta Radavičiūtė
+---
+
+**Lab Session 4**
+
+1. Use ets() to find the best ETS model for the price of eggs (data set
+eggs). How does this model compare to the one you found in the
+previous lab session?
+```{r, message=FALSE}
+library(fpp)#naudojama fpp biblioteka
+```
+
+Ieškome geriausio EST modelio:
+```{r}
+mod1<-ets(eggs)
+mod1f<-forecast(mod1, h=100)
+plot(mod1f)
+```
+
+**Siūlomas modelis EST(M,N,N) - multiplicative errors, no trend, no seasonal.**
+
+Task10(1) kaip geriausias modelis buvo pasirinktas EST(MMN):
+```{r}
+mod2<-ets(eggs, ,model="MMN")
+mod2f<-forecast(mod2, h=100)
+plot(mod2f)
+```
+
+Palyginame šių modelių prognozes grafiškai:
+```{r}
+plot(eggs, xlim=c(1900,2090),ylim=c(0,400))
+lines(mod1f$mean, col=2)
+lines(mod2f$mean, col=3)
+legend("topright", lty=1, col=c(2,3), legend=c("Forecasts from ETS(M,N,N)", "Forecasts from EST(M,M,N)"))
+```
+
+**Matome, kad EST(M,N,N) prognozė išbrėžia tiesę nuo paskutinio taško, o EST(M,M,N) prognozė atsižvelgia į esamą kritimą.**
+
+Palyginame šių modelių RMSE:
+```{r}
+accuracy(mod1f)[2]
+accuracy(mod2f)[2]
+```
+**Reikšmės yra labai panašios, bet mažesnis RMSE yra EST(MMN) modelio, tai galima teigti, kad ši prognozė yra tikslesnė.**
+
+Patikriname ar liekanos atrodo kaip baltasis triukšmas:
+```{r}
+Acf(mod2f$res)
+```
+
+**Iš grafiko galima, teigti, kad liekanos atrodo kaip baltasis triukšmas.**
+
+```{r}
+#H0: liekanos yra baltasis triukšmas
+#H1: liekanos nėra baltasis triukšmas
+Box.test(mod2f$res, fitdf=0, type="Lj")
+```
+
+**p-value >0.05, vadinasi H0 neatmetama. Galima teigti, kad liekanos yra baltasis triukšmas.**
+
+* **Išvados: Galima teigti, kad EST(M,M,N) modelio prognozė yra tikslesnė šiems duomenims.**

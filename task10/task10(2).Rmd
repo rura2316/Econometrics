@@ -1,0 +1,98 @@
+---
+title: "task10(2)"
+output: html_document
+author: Rūta Radavičiūtė
+---
+**Lab Session 3**
+
+2. For this exercise, use the monthly Australian short-term overseas
+visitors data, May 1985–April 2005. (Data set: visitors.)
+```{r, message=FALSE}
+library(fpp)#naudojama fpp biblioteka
+```
+
+* **a)** Make a time plot of your data and describe the main features of
+the series.
+```{r}
+plot(visitors)
+```
+
+Iš grafiko sezoniškumas matosi dėl staigių kilimų ir kritimų kievienais metais, taip pat matosi kylimo trendas.
+
+* **b)** Forecast the next two years using Holt-Winters’ multiplicative
+method.
+```{r}
+vis1<- hw(visitors, seasonal="mult", h=24)
+plot(vis1)
+```
+
+Galima teigti, kad prognozė yra tiksli,nes atsižvelgiama vis į didėjančius sezoniškumo svyravimus.
+
+* **c)** Why is multiplicative seasonality necessary here?
+
+Multiplikatyvus sezoniškumas čia yra svarbus,nes svyravymai vis didėja, o multiplikatyvus sezoniškumas užtikrina didėjančius svyravimus.
+
+* **d)** Experiment with making the trend exponential and/or damped.
+```{r}
+par(mfrow=c(2,2))
+
+#1.Holt-Winters method
+vis1<- hw(visitors, seasonal="mult", h=120)
+plot(vis1, ylim=c(0,1000), main="1 prognozė")
+lines(vis1$fitted, col="red")
+
+#2.Holt-Winters method with exponential trend
+vis2<- hw(visitors, seasonal="mult", h=120,exponential=TRUE)
+plot(vis2, ylim=c(0,1000), main="2 prognozė")
+lines(vis2$fitted, col="red")
+
+#3.Damped Holt-Winters method
+vis3<- hw(visitors, seasonal="mult", h=120,damped=TRUE)
+plot(vis3, ylim=c(0,1000), main="3 prognozė")
+lines(vis3$fitted, col="red")
+
+#4.Damped Holt-Winters method with exponential trend
+vis4<- hw(visitors, seasonal="mult", h=120,damped=TRUE, exponential=TRUE)
+plot(vis4, ylim=c(0,1000), main="4 prognozė")
+lines(vis4$fitted, col="red")
+```
+
+Pirma prognozė yra paveikta esamo trendo ir ji toliau kyla. Antra prognozė taip pat yra paveikta esamo trendo ir ji toliau kyla, tačiau jos pasikliautiniai intervalai yra daug didesni. Trečia prognozė atrodo tiksli, nes damped metodas nuslopina trendą. Ketvirta prognozė labai panaši į trečia, nes damped metodas taip pat nuslopina trendą.
+
+
+* **e)** Compare the RMSE of the one-step forecasts from the various
+methods. Which do you prefer?
+```{r}
+#Holt-Winters method
+vis5<- hw(visitors, seasonal="mult", h=1)
+accuracy(vis5)[2]
+#Holt-Winters method with exponential trend
+vis6<- hw(visitors, seasonal="mult", h=1,exponential=TRUE)
+accuracy(vis6)[2]
+#Damped Holt-Winters method
+vis7<- hw(visitors, seasonal="mult", h=1,damped=TRUE)
+accuracy(vis7)[2]
+#Damped Holt-Winters method with exponential trend
+vis8<- hw(visitors, seasonal="mult", h=1,exponential= TRUE, damped=TRUE)
+accuracy(vis8)[2]
+```
+
+Mažiausias RMSE=14.40219 yra Damped Holt-Winters method, tai galima teigti, kad ši prognozė yra tiksliausia.
+
+* **f)** Check that the residuals from the best model look like white
+noise.
+```{r}
+Acf(vis7$residuals)
+```
+
+Iš grafiko galima teigti, kad liekanos atrodo kaip baltasis triukšmas.
+
+```{r}
+#H0: liekanos yra baltasis triukšmas
+#H1: liekanos nėra baltasis triukšmas
+Box.test(vis7$res, fitdf=0, type="Lj")
+```
+
+p-value >0.05, vadinasi H0 neatmetama. Galima teigti, kad liekanos yra baltasis triukšmas.
+
+
