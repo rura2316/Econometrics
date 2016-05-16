@@ -1,7 +1,7 @@
 ---
 title: "task15"
 output: html_document
-author: "Rūta radavičiūtė"
+author: "Rūta Radavičiūtė"
 ---
 
 #Lab Session 8
@@ -57,7 +57,7 @@ to their AIC values?
 tsdisplay(con2)
 fit1<-auto.arima(cont) #gauname modelį ARIMA(1,0,0)(2,0,0)[12] with non-zero mean  
 fit1
-#sukuriami panasius modelius i auto.arima:
+#sukuriami panasus modeliai i auto.arima:
 fit2 <- Arima(cont, order=c(2,0,1), seasonal=c(2,0,0))
 fit3 <- Arima(cont, order=c(2,0,1), seasonal=c(2,0,1))
 fit4 <- Arima(cont, order=c(1,0,1), seasonal=c(2,0,0))
