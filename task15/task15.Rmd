@@ -1,0 +1,139 @@
+---
+title: "task15"
+output: html_document
+author: "Rūta radavičiūtė"
+---
+
+#Lab Session 8
+
+**1. Choose one of the following seasonal time series: condmilk, hsales,uselec**
+```{r, message=FALSE}
+library(fpp)#naudojama fpp biblioteka
+```
+**(a)** Do the data need transforming? If so, find a suitable transformation.
+```{r,warning=FALSE}
+par(mfrow=c(2,1))
+con<-condmilk
+plot(con, main="Orginalūs condmilk duomenys") #duomenys sezoniniai
+l1<-BoxCox.lambda(con)       #transformacijos lambda -0.402
+plot(BoxCox(con, lambda=l1),col=2, main="BoxCox transformti duomenys")
+cont<-BoxCox(con, lambda=l1) #fiksuojame trasnformuotus duomenis
+```
+
+Box-Cox trasformacija duomenis padaro reguliaresniais, tai naudosime transformuotus duomenis.
+
+**(b)** Are the data stationary? If not, find an appropriate differencing
+which yields stationary data.
+```{r}
+Acf(cont)
+```
+
+Iš ACF grafiko matome, kad duomenys yra sezoniniai. Reikia panaikinti sezoniškumą.
+
+```{r}
+con1<-diff(cont, lag=12)
+plot(con1, col=2)
+Acf(con1)
+```
+
+Duomenis užlaginom per vieną sezono ilgį ir diferencijavome vieną kartą. Iš grafikų  galima matyti, kad duomenis dar nėra stacionarūs, todėl reikia diferencijuosti antrą kartą.
+
+```{r, warning=FALSE}
+con2<-diff(con1)
+plot(con2,col=2)
+Acf(con2)
+#H0: duomenys yra stacionarus ir nesezoniniai
+kpss.test(con2)
+#p value > 0.05 H0 priimame
+```
+
+Duomenis atrodo panašūs į stacionarius, o atlikus kpss testą galima teigti, kad duomenys yra stacionarūs.
+
+**(c)** Identify a couple of ARIMA models that might be useful in describing
+the time series. Which of your models is the best according
+to their AIC values?
+
+```{r}
+tsdisplay(con2)
+fit1<-auto.arima(cont) #gauname modelį ARIMA(1,0,0)(2,0,0)[12] with non-zero mean  
+fit1
+#sukuriami panasius modelius i auto.arima:
+fit2 <- Arima(cont, order=c(2,0,1), seasonal=c(2,0,0))
+fit3 <- Arima(cont, order=c(2,0,1), seasonal=c(2,0,1))
+fit4 <- Arima(cont, order=c(1,0,1), seasonal=c(2,0,0))
+fit5 <- Arima(cont, order=c(1,0,0), seasonal=c(1,0,0))
+fit6 <- Arima(cont, order=c(2,0,0), seasonal=c(1,0,1))
+```
+
+Palyginkime modelių AIC:
+```{r, echo=FALSE}
+Modelis<-c("fit1", "fit2","fit3","fit4","fit5","fit6")
+AIC<-c(AIC(fit1),AIC(fit2),AIC(fit3),AIC(fit4), AIC(fit5),AIC(fit6))
+data.frame(Modelis,AIC)
+```
+Palyginkime modelių RMSE:
+```{r, echo=FALSE}
+ans = rbind(
+  accuracy(fit1)[2],
+  accuracy(fit2)[2],
+  accuracy(fit3)[2],
+  accuracy(fit4)[2],
+  accuracy(fit5)[2],
+  accuracy(fit6)[2]
+)
+rownames(ans) <- Modelis
+colnames(ans) <- ('RMSE')
+ans
+```
+
+Geriausias modelis yra fit6 - ARIMA(2,0,0)(1,0,1)[12] with non-zero mean, nes mažiausias AIC ir RMSE
+
+**(d)** Estimate the parameters of your best model and do diagnostic
+testing on the residuals. Do the residuals resemble white noise?
+```{r}
+fit6
+par(mfcol=c(2,1))
+plot(fit6$res, col=2, main="Liekanos fit6")
+Acf(fit6$res)
+#H0: liekanos yra baltasis triukšmas
+Box.test(fit6$res, type="Lj")
+#p-value > 0.05 H0 priimame
+```
+
+Iš AFC grafiko galime matyti,kad liekanos yra panašios į baltąjį triukšmą, o patikrinus su box test galima patvirtinti, kad liekanos yra baltasis triukšmas.
+
+**(e)** Forecast the next 24 months of data using your preferred model.
+```{r}
+plot(forecast(fit6, h=24))
+```
+
+Prognozė atrodo logiška ir pakankamai tiksli.
+
+**(f)** Compare the forecasts obtained using ets().
+```{r}
+fit7<-ets(cont)#gauname modeli ETS(A,N,A) 
+plot(forecast(fit7))
+Acf(residuals(fit7))
+#H0: liekanos yra baltasis triukšma
+Box.test(residuals(fit7), type="Lj")
+#p-value > 0.05 H0 priimame.
+```
+
+Iš ACF grafiko galima matyti,kad liekanos yra baltasis triukšmas,o patikrinus su box test galimapatvirtinti, kad liekanos yra baltasis triukšmas.
+
+Palyginkime ARIMA ir EST modelius:
+```{r,echo=FALSE}
+ans1 <- rbind(
+  accuracy(fit6)[2],
+  accuracy(fit7)[2]
+)
+rownames(ans1) <- c( 'fit6', 'fit7')
+colnames(ans1) <- c('RMSE')
+ans1
+
+modelis<-c("fit6","fit7")
+aic<-c(AIC(fit6),AIC(fit7))
+data.frame(modelis,aic)
+```
+
+Modelių RMSE yra labai panašūs (šiek tiek mažesnis modelio EST), o AIC yra mažesnis modelio ARIMA. Modelių prognozės atrodo labai panašiai, tačiau žiūrint į grafikus ARIMA prognozė atrodo tikslesnė, nes svyravimai panašesni į buvusius svyravimus.
