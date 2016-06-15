@@ -1,0 +1,392 @@
+---
+title: "Egzaminas"
+author: "Rūta Radavičiūtė"
+date: "Wednesday, June 15, 2016"
+output: html_document
+---
+
+```{r,message=FALSE, warning=FALSE}
+library(car)
+library(fpp)
+library(dynlm)
+library(knitr)
+```
+
+Užduotis 2
+--------------------------------------------------
+  
+Faile 'data_b.csv' yra pateikti duomenys reikalingi tiesinės regresijos tyrimui. 
+Duomenų masyvo aprašymas pateiktas minėto failo gale.
+
+1. Duomenų apžvalga ir paruošimas. Šioje dalyje jums reikia susipažinti su duomenimis 
+ir paruošti duomenis tolimesnei analizei. 
+
+  a) Nuskaitykite duomenų masyvą. Jeigu įmanoma, nekoreguokite originalaus failo.
+  
+```{r}
+#dat<-read.csv2("data_b.csv", header=T) #neiseina tinkamai nusiskaityti duomenu, taciau pabandysiu kitus zingsnius parasyti kaip galima atlikti teoriskai
+```
+
+
+  b) Paruoškite duomenis naudojimui. Jūs turite užtikrinti, kad:
+    
+    * Neliko įrašų su trūkstamomis reikšmėmis - jeigu šalinote įrašus, 
+    tai būtinai raportuokite kiek įrašų pašalinta ir kiek liko.
+    
+    
+```{r}
+#sum(dat == "MISSING") bus pranesta, kurios reiksmes yra trukstamos
+```
+
+
+
+    * Duomenų masyve nėra kažkokių klaidų (pvz. negalimos reikšmės, neteisingas duomenų tipas, 
+    didelės išskirtys ir t.t.) 
+    
+```{r}
+#Isskirtis galima tikrinti su boxplot
+#Arba
+#Isskirtis tinkriname su influence.measures, pasitarius tiesini modeli ir parametras cook.d (*) parodo išskirtis
+#Arba
+#isskirtis tikriname su outlierTest taip pat pasidarius tiesini modeli
+```
+
+
+  c) Pateikite trumpą kintamųjų apžvalgą.
+  Naudokite tik tuos duomenis (ir kintamuosius), kuriuos planuojate taikyti tyrimui, 
+  t.y. jei reikėjo ką nors modifikuoti, tai senųjų reikšmių naudoti nebereikia. 
+  Šiai apžvalgai užtenka informacijos, kurią pateikia funkcijos `plot`, `summary` ir `cor`. 
+  
+```{r}
+#Is plot galime pasakyti ar duomenys koreliuoja ar yra matomos ryskios isskirtis
+#Summry suteiks informacija apie vidurkius, medianas 
+#Cor galima paziureti dvieju kintamuju tarpusavio koreliacija ar visu kintamuju koreliacija
+```
+
+  d) Duomenų masyvą suskaidykite į du atskirus ir nesikertančius masyvus. 
+  Didesnį masyvą turi sudaryti apie 80 proc. turimų stebėjimų. Šį masyvą vadinsime `trainSet`.
+  Mažesnį masyvą turi sudaryti likę įrašai. Šį masyvą vadinsime `testSet`.
+  Duomenų suskaidymas turi būti atsitiktinis. Gali būti naudingos šios funkcijos:`sample`, `setdiff`, `%in%`.
+  
+```{r}
+# http://stackoverflow.com/questions/17200114/how-to-split-data-into-training-testing-sets-using-s## ample-function-in-r-program 
+#Cia galima matyti kaip reikia padalinti duomenis
+```
+
+
+2. Tiesinio modelio sudarymas. Modelio sudarymui naudokite `trainSet` masyvą.
+
+  a) Įvertinkite tiesinį modelių, kuriame 
+prognozuojamas kintamasis būtų išlaios vaisiams. 
+Jos turi tiesiškai priklausyti nuo kitų kintamųjų. 
+
+
+  b) Ar visi įtraukti kintamieji daro reikšmingą įtaką prognozei?
+  Jei ne, koreguokite modelį, kad visi kintamieji darytų reikšmingą įtaką. 
+```{r}
+#Is modelio summary lenteles pagal p-value kuris didesnis uz 0.05 galime matyti, kurie kintamieji yra nereiksmingi
+```
+
+
+  c) Patikrinkite modelio savybes (multikolinerumą, heteroskedastiškumą ir paklaidų normalumą). 
+  Jei kuri nors savybė nėra gera, 
+tai pakomentuokite kokios to gali būti pasekmės (ar rizikos).
+
+```{r}
+# Jei vif<10, multikolinearumo problemos nera
+# shapiro.test tikrina paklaidu normaluma, jei  p-value>0.05, paklaidos nera normalios taip pat paklaidu normaluma galima patikrinti ir issibreze histograma
+#ncvTest  tikrina heteroskedastiskuma, jei p-value >0,05 H0 atmesti negalime, vadinasi modelis geras t.y(duomenys homoskedastiški)
+```
+
+
+
+
+
+3. Modelio tobulinimas. Ar gali būti, kad duomenyse pasireiškė netiesinė sąveika?
+Siekiant ją patikti prasminga pasižiūrėti sklaidos diagramą tarp modelio paklaidų 
+ir tiriamų kintamųjų.
+
+  a) Pateikite dvi sklaidos diagramas. Pirmoji tarp modelio paklaidų ir `butinosIslaidos` kintamojo. 
+  O antroji, tarp modelio paklaidų ir `pajamos` kintamojo. Pakomentuokite rezultatus.
+  Tendencijų išryškinimui gali būti naudinga `lowess` funkcija.
+
+
+
+  b) Tikėtina, kad ne visų duomenų priklausomybė yra tiesinė. 
+  Kokius pakeitimus siūlytumėte? Pabandykite sumažinti
+  netiesiškumo pasekmes. Galutinį modelio variantą žymėsime `fit2`.
+
+4. Modelių palyginimas ir prognozė. 
+  
+  a) Suskaičiuokite modelių `fit1` ir `fit2` RMSE,
+  $$ MSE = \frac{1}{n} \sum_{i=1}^n \varepsilon_t^2.$$
+  
+  MSE suskaičiuokite abiem duomenų masyvams `trainSet` ir `testSet`. 
+  Rezultatus sudėkite į lentelę.
+  Palyginkite rezultatus ir padarykite išvadas.
+  Kuris modelis geresnis? Geresnį modelį žymėsime `fitMain`. 
+  Užrašykite šio modelio lygtį.
+
+
+
+  b) Išbrėžkite sklaidos diagramą, kurioje $x$ ašyje būtų `fitMain` modelio `testSet` prognozė, o $y$ ašyje
+  faktinės `testSet` pajamų reikšmės. 
+
+  c) Kiek procentų `testSet` reikšmių buvo aukščiau nei atitinkamų
+ pasikliautinių intervalų (80 proc.) didesnioji reikšmė? 
+
+
+
+Užduotis 3 
+--------------------------------------------------
+Pakete `dynlm` yra duomenų masyvas `M1Germany`.
+
+1. Duomenų paruošimas ir pažvalga. 
+
+```{r}
+library(dynlm)
+summary(M1Germany)
+plot(M1Germany)
+```
+
+  a) Minėtame duomenų masyve yra `logprice` kintamasis, kuris žymi kainų indekso logiritmą.
+  Iš šio kintamojo jums reikia įvertinti kainų vidutinį santykini augimo tempą. 
+  Vidutinis santykini augimo tempas pasižymi savybe: jei nuo pirmojo stebėjimo $x_1$, 
+  kiti duomenys didėtų pastoviu santykinių greičiu, 
+  tai po $N$ laikoterpių apskaičiuota reikšmė bus lygi paskutiniam stebėjimui $x_N$, t.y. galioja lygybė:
+  $$x_1 (1 + \mu)^N =x_N$$,
+
+kur $\mu$ yra vidutinis santykinis augimo tempas.
+
+
+  a) Įvertinkite tiesinę regresija žemiau pateikto modelio:
+
+  $$ logprice_t = \beta_0 + \beta_1 loggnp_{t-1} + \beta_2 \Delta loggnp_{t-2} + s_t + \varepsilon_t,$$
+čia $s_t$ žymi sezoninę komponentę.
+
+```{r}
+mod1 <- dynlm(logprice ~ L(loggnp,1)+(d(L(loggnp,2))), data = M1Germany)
+mod1
+#nezinau kaip prideti sezonine komponente todel sukuriau tiesine regresija be jos
+```
+
+
+
+  b) Gaukite įvertintos lygties liekanas. Jas vadinsime `ser`. 
+  Rekomenduojama liekanų objektą transformuoti į laiko eilučių klasę (`ts`).
+  
+```{r}
+ser<-mod1$res
+ser<-as.ts(ser)
+```
+  
+
+
+  c) Ar `ser` laiko eilutė stacionari. Jei ne - raskite skirtumų operacijas, kurios pasiektų stacionarumą.
+  Jeigu naudojate automatines procedūras, tai atsakymą patikrinkite ekspertiškai. 
+  
+```{r}
+tsdisplay(ser)
+```
+
+1.Sezoniškumas matosi dėl trumpų kilimų ir kritimų kievienais metais.
+
+2.Ciklas motosi kelių metų bendras kilimas ir poto kritimas.Pirmas ciklas 1960-1970m., antras ciklas 1970-1980m., trečias ciklas 1980-1990m. ir toliau prasideda ketvirtas ciklas.
+
+3.Trendo nėra.
+
+Tačiau ar duomenys pakankamai horizontalus ir ju variacija pastovi patikrinsime su nsdiffs funkcija
+
+```{r,warning=FALSE}
+n<-nsdiffs(ser) # siuloma diferencijavimo eile 0
+#Todel galime teigti, kad diferencijuoti nebereikia
+kpss.test(ser) 
+# p-value<0.05 H0 atmetame, duomenys nera stacionaruss ir nesezoniniai.
+# Vadinasi reikia panaikinti sezoniskuma
+ser1<-diff(ser, lag=2)
+kpss.test(ser1)
+## p-value>0.05 H0 priimame, duomenys yra stacionarus ir nesezoniniai.
+```
+
+
+  d) Pagalvokite ar eilutei `ser` reikalinga Box-Cox transformaciją - sprendimą argumentuokite.
+  Jei reikalinga, tai užtikrinkite, kad
+  visi žemiau panaudoti modeliai naudotų tą pačią transformaciją.
+  
+```{r}
+plot(ser1) # svyravimai skirtingais laiko momentasi yra nevienodi,todel box.cox transformacija turetu  buti naudinga.
+lambda1<-BoxCox.lambda(ser1) ## transformacijos lambda 1.093087
+lambda1
+ser2<-BoxCox(ser1,lambda1) ## atliekame transformacija
+plot(ser2, main="Transformuoti duomenys")
+#Is grafiko matome, kad transformacija nieko reiksmingo neatliko.
+#vadinasi siems duomenims Box-cox transformacijos nereikalinga
+```
+
+
+
+2. Modeliavimas.
+
+  a)  Eilutei `ser` panaudoje `ets` funkcija raskite siūlomą eksponentinio glodinimo modelį.
+  Paaiškinkite ką reiškia modelio žymėjimai. Šį modeli vadinsime `mod1`.
+  
+```{r}
+mod1<-ets(ser1)
+mod1 #siulomas modelis ETS(A,N,A) reiskia additive errors, none trend, additive season
+```
+
+The first letter denotes the error type ("A", "M" or "Z"); the second letter denotes the trend type ("N","A","M" or "Z"); and the third letter denotes the season type ("N","A","M" or "Z"). In all cases, "N"=none, "A"=additive, "M"=multiplicative and "Z"=automatically selected.
+
+Šaltinis: http://www.inside-r.org/packages/cran/forecast/docs/ets
+
+  b) Pabandykite paieškoti geresnių alternatyvų. Išbandykite kitus du variantus.
+Kuris modelis atrodo geriausias? Kodėl? Geriausią pasirinktą modelį vadinsime `mod2`.
+Aiškiai įvardinkite kurį modelį pasirinkote. Kuo jis skiriasi nuo `mod1`?
+
+```{r}
+
+
+```
+
+
+
+
+  c) Eilutei `ser` pritaikykite `auto.arima` funkciją. 
+Pakomentuokite ką reiškia modelio žymėjimai? Šį modelį vadinsime `mod3`. 
+Ar pasiūlyta integruotumo eilė sutampa su 1.c atsakyme jūsų pasiūlyta eile.
+
+```{r,warning=FALSE}
+mod3<-auto.arima(ser1)
+mod3 #siulomas modelis ARIMA(1,0,1)(1,0,2)[4] with zero mean 
+#(p,d,q)(P,D,Q)
+#Mazosios raides - nesezonine modelio dalis
+#p - autoregresine modelio dalis
+#d - diferencijavimo eile
+#q - moving average modelio dalis
+#Didziosios raides -  sezonine modelio dalis
+#P - autoregresine modelio dalis
+#D - diferencijavimo eile
+#Q - moving average modelio dalis
+#Indeksas salia antruju skliaustu reiskia periodu skaiciu per sezona.
+#Integravimo eiles sutampa.1.c buvo siuloma 0 ir 2.c siuloma taip pat 0
+```
+
+
+  
+  d) Paeksperimentuokite su kitomis galimomis specifikacijomis (pabandykite bent dvi).
+  Kuri atrodo geriausia? Pasirinktą modelį vadinsime `mod4`.  
+  
+```{r}
+#Remiantis ACF ir PartilaACF grafikais pabandysime sukurti modelius. (Pagal "Hyndman2014a: Forecasting - Principles and Practice" vadovėlio 76psl "ACF and PACF interpretation")
+acf(ser1)
+#nors testas kpss.test teige, kad duomenys yra stacionarus ir nesezonianiai ir acf grafiko galime patyti, kad jie yra ryskiai sezoniniai
+pacf(ser1)
+#Kadangi yra padaryta klaida bandant duomenys padaryti stacionariais ir nesezonianiais, kursime kitus modelius panasius i auto.arima +-1 koeficientams (p,d,q)(P,D,Q):
+ban1=arima(ser1, order = c(2,0,0),seasonal = list(order=c(2,0,1),period=4))
+ban2=arima(ser1, order = c(0,0,1),seasonal = list(order=c(1,0,1),period=4))
+accuracy(ban1)
+accuracy(ban2)
+#Pagal rmse geresnis yra bandymas 2
+mod4<-ban2
+```
+
+
+
+
+3. Modelių tyrimas ir palyginimas
+
+  a) Patikrinkite visų keturių modelių liekanas - ar jos atrodo kaip baltas triukšmas?  
+  
+  
+```{r}
+acf(mod1$res)
+acf(mod3$res)
+acf(mod4$res)
+#Is acf grafiko modeliu liekanos panasios i baltaji triuksma
+Box.test(mod1$res, type="Lj")
+Box.test(mod3$res, type="Lj")
+Box.test(mod4$res, type="Lj")
+#Pagal testo p-value mod1 ir mod3 liekanos nera baltasis triuksmas,nes p-value < 0.05 H0 atmetama, o mod2 liekanos yra baltasis triuksmas, nes p-value > 0.05 H0 priimame.
+```
+
+  b) Turimą laiko eilutę `ser` sumažinkite taip, kad ją sudarytų apie 75-80 proc. 
+  pirmųjų stebėjimų - 
+  šią eilutę vadinsime `trainSet`. Likusią eilutės dalį vadinsime `testSet`.
+  
+```{r}
+trainSet<-window(ser1, end=c(1985,4))
+testSet<-window(ser1, start=c(1986,1))
+
+```
+
+  c) Įvertinkite visus keturis modelius naudodami `trainSet`.
+  
+```{r}
+mod1_1<-ets(trainSet)
+mod3_3<-auto.arima(trainSet)
+mod4_4<-arima(trainSet, order = c(0,0,1),seasonal = list(order=c(1,0,1),period=4))
+accuracy(mod1_1)
+accuracy(mod3_3)
+accuracy(mod4_4)
+#pagal rmse geriausias yra mod3_3, nes rmse maziausias
+```
+
+  d) Išbrėžkite visų keturių modelių prognozes (su pasikliautinais intervalais). 
+  Ir ant viršau išbrėžkite faktines reikšmes iš
+   `testSet` duomenų. Kuri prognozė atrodo geriausia?
+```{r, echo=F}
+plot(forecast(mod1_1, h=20))
+lines(testSet, add=T, lwd=2, col=3)
+plot(forecast(mod3_3, h=20))
+lines(testSet, add=T, lwd=2, col=4)
+plot(forecast(mod4_4, h=20))
+lines(testSet, add=T, lwd=2, col=5)
+
+#Geriausiais atrodo prognoze mod3_3, nes isbrezta ant virsaus faktine reiksme labiausiai atitinka prognoze ir prognozes pasikliautinieji intervalai maziausi, taciau visos trys prognozes pabaigoje turi dideli suoli, kuris neatrodo racionalus.
+```
+  
+  e) Patikrinkite visų modelių tikslumą su funkciją `accuracy`. 
+  Turi matytis tikslumas `trainSet` ir `testSet` duomenims.
+  Kuris modelis atrodo geriausias? 
+  Pasirinktą modelį vadinsime `modMain`.
+
+```{r}
+#Fiksuojame prognozes
+f_mod1_1<-forecast(mod1_1, h=20)
+f_mod3_3<-forecast(mod3_3, h=20)
+f_mod4_4<-forecast(mod4_4, h=20)
+
+tab1 = rbind(
+  accuracy(f_mod1_1, ser)[,2],
+  accuracy(f_mod3_3, ser)[,2],
+  accuracy(f_mod4_4, ser)[,2]
+)
+rownames(tab1) <- c("f_mod1_1", "f_mod3_3", "f_mod4_4")
+kable(tab1, digits=3)
+#training set maziausias rmse yra f_mod3_3, o test set maziausias rmse yra f_mod1_1.taciau as pasirenku modeli f_mod3_3, nes jo ir grafikas atrodo tiksliausiai
+modMain<-f_mod3_3
+```
+
+
+
+4. Tikslumo tyrimas. Parašykite R procedūrą, kurios psiaudo-kodas atorodo taip:
+
+```
+tikslumas(i):
+    subset = eilutės ser dalis nuo pirmo stebėjimo iki i-tojo.
+    modeliui modMain pritaikyti subset duomenis (modelio nepervertinti)
+    tuomet gauti prognozes i+1, ..., i+20 laikotarpiams
+    suskaiciuoti gautu prognoziu RMSE
+    funkcija grazina RMSE
+```
+```{r}
+#tikslumas<-function(i){
+#    subset = window(ser, start=1, end=i)
+#nezinau kaip toliau rasyti funkcija   
+```
+
+
+Šią funkciją pritaikykite skirtingiems i ir išbrėžkite grafiką, kuriame matytųsi RMSE priklausomybę nuo i.
+Kaip interpretuoti šį grafiką?
+
+  
